@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_epub_viewer/src/epub_controller.dart';
 import 'package:flutter_epub_viewer/src/helper.dart';
 import 'package:flutter/foundation.dart';
@@ -82,6 +84,35 @@ class _EpubViewerState extends State<EpubViewer> {
       verticalScrollBarEnabled: false,
       // disableVerticalScroll: true,
       selectionGranularity: SelectionGranularity.CHARACTER);
+
+  Future<void> _loadAndInjectFonts() async {
+    // A map to hold font data
+    final Map<String, String> fontMap = {};
+
+    // List of your fonts
+    final fontsToLoad = {
+      'Nunito': 'packages/flutter_epub_viewer/lib/assets/webpage/fonts/Nunito-Regular.ttf',
+      'Playfair Display': 'packages/flutter_epub_viewer/lib/assets/webpage/fonts/PlayfairDisplay-Regular.ttf',
+      'Open Dyslexic': 'packages/flutter_epub_viewer/lib/assets/webpage/fonts/OpenDyslexic-Regular.otf',
+    };
+
+    // Loop through, load each font, and convert to Base64
+    for (var entry in fontsToLoad.entries) {
+      try {
+        final byteData = await rootBundle.load(entry.value);
+        final base64String = base64Encode(byteData.buffer.asUint8List());
+        fontMap[entry.key] = base64String;
+      } catch (e) {
+        debugPrint('Error loading font ${entry.key}: $e');
+      }
+    }
+
+    // Convert the map to a JSON string to pass to JavaScript
+    final String fontJson = jsonEncode(fontMap);
+
+    // Call a new JavaScript function to set up the fonts
+    await webViewController?.evaluateJavascript(source: 'setupCustomFonts($fontJson);');
+  }
 
   @override
   void initState() {
@@ -230,7 +261,9 @@ class _EpubViewerState extends State<EpubViewer> {
 
         return NavigationActionPolicy.ALLOW;
       },
-      onLoadStop: (controller, url) async {},
+      onLoadStop: (controller, url) async {
+        await _loadAndInjectFonts();
+      },
       onReceivedError: (controller, request, error) {},
 
       onProgressChanged: (controller, progress) {},
