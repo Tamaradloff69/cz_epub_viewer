@@ -36,6 +36,7 @@ flutter:
   assets:
     - lib/assets/webpage/dist/
     - lib/assets/webpage/html/
+    - lib/assets/webpage/fonts/
 
 
   #
