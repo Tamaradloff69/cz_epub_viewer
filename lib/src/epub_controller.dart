@@ -156,22 +156,13 @@ class EpubController {
         source: 'setManager("$manager")');
   }
 
-  ///Adjust font size in epub viewer
-  setFontSize({required double fontSize}) async {
+  Future<void> applyStyles({
+    required String fontFamily,
+    required double fontSize,
+  }) async {
+    checkEpubLoaded();
     await webViewController?.evaluateJavascript(
-        source: 'setFontSize("$fontSize")');
-  }
-
-  /// Adjust font family in epub viewer
-  setFontFamily({required String fontFamily}) async {
-    if (webViewController == null) {
-      print("EPUB_CONTROLLER_ERROR: webViewController is null. Cannot execute JavaScript.");
-      return;
-    }
-
-    print("EPUB_CONTROLLER: Connection is OK. Executing JavaScript...");
-    await webViewController?.evaluateJavascript(
-        source: 'setFontFamily("$fontFamily")');
+        source: 'applyReaderStyles("$fontFamily", $fontSize)');
   }
 
   updateTheme({required EpubTheme theme}) async {
