@@ -85,34 +85,25 @@ class _EpubViewerState extends State<EpubViewer> {
       // disableVerticalScroll: true,
       selectionGranularity: SelectionGranularity.CHARACTER);
 
-  Future<void> _loadAndInjectFonts() async {
-    // A map to hold font data
+  Future<String> _prepareFontJson() async {
     final Map<String, String> fontMap = {};
-
-    // List of your fonts
     final fontsToLoad = {
       'Nunito': 'packages/flutter_epub_viewer/lib/assets/webpage/fonts/Nunito-Regular.ttf',
       'Playfair Display': 'packages/flutter_epub_viewer/lib/assets/webpage/fonts/PlayfairDisplay-Regular.ttf',
       'Open Dyslexic': 'packages/flutter_epub_viewer/lib/assets/webpage/fonts/OpenDyslexic-Regular.otf',
     };
 
-    // Loop through, load each font, and convert to Base64
     for (var entry in fontsToLoad.entries) {
       try {
         final byteData = await rootBundle.load(entry.value);
-        final base64String = base64Encode(byteData.buffer.asUint8List());
-        fontMap[entry.key] = base64String;
+        fontMap[entry.key] = base64Encode(byteData.buffer.asUint8List());
       } catch (e) {
         debugPrint('Error loading font ${entry.key}: $e');
       }
     }
-
-    // Convert the map to a JSON string to pass to JavaScript
-    final String fontJson = jsonEncode(fontMap);
-
-    // Call a new JavaScript function to set up the fonts
-    await webViewController?.evaluateJavascript(source: 'setupCustomFonts($fontJson);');
+    return jsonEncode(fontMap);
   }
+
 
   @override
   void initState() {
@@ -198,8 +189,12 @@ class _EpubViewerState extends State<EpubViewer> {
   }
 
   loadBook() async {
-    var data = await widget.epubSource.epubData;
+    final String fontJson = await _prepareFontJson();
     final displaySettings = widget.displaySettings ?? EpubDisplaySettings();
+
+    // 2. Escape the font JSON for safe transport inside the JS string
+    final escapedFontJson = fontJson.replaceAll('"', '\\"');
+    var data = await widget.epubSource.epubData;
     String manager = displaySettings.manager.name;
     String flow = displaySettings.flow.name;
     String spread = displaySettings.spread.name;
@@ -217,9 +212,10 @@ class _EpubViewerState extends State<EpubViewer> {
     String? foregroundColor =
         widget.displaySettings?.theme?.foregroundColor?.toHex();
 
+    // NEW CODE (with the escapedFontJson variable added at the end)
     webViewController?.evaluateJavascript(
         source:
-            'loadBook([${data.join(',')}], "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor")');
+        'loadBook([${data.join(',')}], "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor", "$escapedFontJson")');
   }
 
   @override
@@ -261,9 +257,7 @@ class _EpubViewerState extends State<EpubViewer> {
 
         return NavigationActionPolicy.ALLOW;
       },
-      onLoadStop: (controller, url) async {
-        await _loadAndInjectFonts();
-      },
+      onLoadStop: (controller, url) async {},
       onReceivedError: (controller, request, error) {},
 
       onProgressChanged: (controller, progress) {},
