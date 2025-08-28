@@ -164,7 +164,6 @@ class EpubController {
 
   /// Adjust font family in epub viewer
   setFontFamily({required String fontFamily}) async {
-    checkEpubLoaded();
     await webViewController?.evaluateJavascript(
         source: 'setFontFamily("$fontFamily")');
   }
