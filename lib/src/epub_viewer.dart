@@ -238,6 +238,7 @@ class _EpubViewerState extends State<EpubViewer> {
       onConsoleMessage: (controller, consoleMessage) {
         if (kDebugMode) {
           debugPrint("JS_LOG: ${consoleMessage.message}");
+          print("WebView Log: ${consoleMessage.message}");
           // debugPrint(consoleMessage.message);
         }
       },
