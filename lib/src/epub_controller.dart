@@ -162,6 +162,13 @@ class EpubController {
         source: 'setFontSize("$fontSize")');
   }
 
+  /// Adjust font family in epub viewer
+  setFontFamily({required String fontFamily}) async {
+    checkEpubLoaded();
+    await webViewController?.evaluateJavascript(
+        source: 'setFontFamily("$fontFamily")');
+  }
+
   updateTheme({required EpubTheme theme}) async {
     String? backgroundColor = theme.backgroundColor?.toHex();
     String? foregroundColor = theme.foregroundColor?.toHex();
