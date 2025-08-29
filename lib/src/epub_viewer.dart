@@ -16,6 +16,7 @@ class EpubViewer extends StatefulWidget {
     required this.epubController,
     required this.epubSource,
     this.initialCfi,
+    this.onPageCountReady,
     this.onChaptersLoaded,
     this.onEpubLoaded,
     this.onRelocated,
@@ -35,6 +36,8 @@ class EpubViewer extends StatefulWidget {
   ///Initial cfi string to  specify which part of epub to load initially
   ///if null, the first chapter will be loaded
   final String? initialCfi;
+
+  final ValueChanged<int>? onPageCountReady;
 
   ///Call back when epub is loaded and displayed
   final VoidCallback? onEpubLoaded;
@@ -123,6 +126,14 @@ class _EpubViewerState extends State<EpubViewer> {
         callback: (data) {
           // widget.onEpubLoaded?.call();
         });
+
+    webViewController?.addJavaScriptHandler(
+      handlerName: 'epubPageCount',
+      callback: (args) {
+        final int totalPages = args[0];
+        widget.onPageCountReady?.call(totalPages);
+      },
+    );
 
     webViewController?.addJavaScriptHandler(
         handlerName: "chapters",
