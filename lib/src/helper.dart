@@ -58,14 +58,22 @@ class EpubLocation {
   /// Progress percentage of location, value between 0.0 and 1.0
   double progress;
 
+  int totalPages;
+
   EpubLocation({
     required this.startCfi,
     required this.endCfi,
     required this.progress,
+    required this.totalPages,
   });
-  factory EpubLocation.fromJson(Map<String, dynamic> json) =>
-      _$EpubLocationFromJson(json);
-  Map<String, dynamic> toJson() => _$EpubLocationToJson(this);
+  factory EpubLocation.fromJson(Map<String, dynamic> json) {
+    return EpubLocation(
+      startCfi: json['startCfi'] as String,
+      endCfi: json['endCfi'] as String,
+      progress: (json['progress'] as num).toDouble(),
+      totalPages: json['totalPages'] as int? ?? 0, // ADD THIS LINE
+    );
+  }
 }
 
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
@@ -96,6 +104,7 @@ class EpubDisplaySettings {
   final bool useSnapAnimationAndroid;
 
   /// Theme of the reader, by default it uses the book theme
+  @JsonKey(includeFromJson: false, includeToJson: false)
   final EpubTheme? theme;
 
   EpubDisplaySettings({

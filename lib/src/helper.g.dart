@@ -39,6 +39,7 @@ EpubLocation _$EpubLocationFromJson(Map<String, dynamic> json) => EpubLocation(
       startCfi: json['startCfi'] as String,
       endCfi: json['endCfi'] as String,
       progress: (json['progress'] as num).toDouble(),
+      totalPages: (json['totalPages'] as num).toInt(),
     );
 
 Map<String, dynamic> _$EpubLocationToJson(EpubLocation instance) =>
@@ -46,6 +47,7 @@ Map<String, dynamic> _$EpubLocationToJson(EpubLocation instance) =>
       'startCfi': instance.startCfi,
       'endCfi': instance.endCfi,
       'progress': instance.progress,
+      'totalPages': instance.totalPages,
     };
 
 EpubDisplaySettings _$EpubDisplaySettingsFromJson(Map<String, dynamic> json) =>
@@ -54,12 +56,14 @@ EpubDisplaySettings _$EpubDisplaySettingsFromJson(Map<String, dynamic> json) =>
       spread: $enumDecodeNullable(_$EpubSpreadEnumMap, json['spread']) ??
           EpubSpread.auto,
       flow: $enumDecodeNullable(_$EpubFlowEnumMap, json['flow']) ??
-          EpubFlow.scrolled,
+          EpubFlow.paginated,
       allowScriptedContent: json['allowScriptedContent'] as bool? ?? false,
       defaultDirection: $enumDecodeNullable(
               _$EpubDefaultDirectionEnumMap, json['defaultDirection']) ??
           EpubDefaultDirection.ltr,
-      snap: json['snap'] as bool? ?? false,
+      snap: json['snap'] as bool? ?? true,
+      useSnapAnimationAndroid:
+          json['useSnapAnimationAndroid'] as bool? ?? false,
       manager: $enumDecodeNullable(_$EpubManagerEnumMap, json['manager']) ??
           EpubManager.continuous,
     );
@@ -75,6 +79,7 @@ Map<String, dynamic> _$EpubDisplaySettingsToJson(
       'allowScriptedContent': instance.allowScriptedContent,
       'manager': _$EpubManagerEnumMap[instance.manager]!,
       'snap': instance.snap,
+      'useSnapAnimationAndroid': instance.useSnapAnimationAndroid,
     };
 
 const _$EpubSpreadEnumMap = {
