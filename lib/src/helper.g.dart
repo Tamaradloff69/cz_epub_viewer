@@ -35,21 +35,6 @@ Map<String, dynamic> _$EpubSearchResultToJson(EpubSearchResult instance) =>
       'excerpt': instance.excerpt,
     };
 
-EpubLocation _$EpubLocationFromJson(Map<String, dynamic> json) => EpubLocation(
-      startCfi: json['startCfi'] as String,
-      endCfi: json['endCfi'] as String,
-      progress: (json['progress'] as num).toDouble(),
-      totalPages: (json['totalPages'] as num).toInt(),
-    );
-
-Map<String, dynamic> _$EpubLocationToJson(EpubLocation instance) =>
-    <String, dynamic>{
-      'startCfi': instance.startCfi,
-      'endCfi': instance.endCfi,
-      'progress': instance.progress,
-      'totalPages': instance.totalPages,
-    };
-
 EpubDisplaySettings _$EpubDisplaySettingsFromJson(Map<String, dynamic> json) =>
     EpubDisplaySettings(
       fontSize: (json['fontSize'] as num?)?.toInt() ?? 15,
