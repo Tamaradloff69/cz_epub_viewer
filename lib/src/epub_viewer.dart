@@ -85,9 +85,7 @@ class _EpubViewerState extends State<EpubViewer> {
       iframeAllowFullscreen: true,
       allowsLinkPreview: false,
       verticalScrollBarEnabled: false,
-      horizontalScrollBarEnabled: false, // <-- ADD THIS
-      disableHorizontalScroll: true,
-      //disableVerticalScroll: true,
+      // disableVerticalScroll: true,
       selectionGranularity: SelectionGranularity.CHARACTER);
 
   Future<String> _prepareFontJson() async {
@@ -217,7 +215,8 @@ class _EpubViewerState extends State<EpubViewer> {
     String direction = widget.displaySettings?.defaultDirection.name ??
         EpubDefaultDirection.ltr.name;
 
-    bool useCustomSwipe = (displaySettings.flow == EpubFlow.paginated);
+    bool useCustomSwipe =
+        Platform.isAndroid && !displaySettings.useSnapAnimationAndroid;
 
     String? backgroundColor =
         widget.displaySettings?.theme?.backgroundColor?.toHex();
@@ -282,8 +281,8 @@ class _EpubViewerState extends State<EpubViewer> {
         }
       },
       gestureRecognizers: {
-        Factory<HorizontalDragGestureRecognizer>( // <-- ADD THIS LINE
-                () => HorizontalDragGestureRecognizer()),
+        Factory<VerticalDragGestureRecognizer>(
+            () => VerticalDragGestureRecognizer()),
         Factory<LongPressGestureRecognizer>(() => LongPressGestureRecognizer(
             duration: const Duration(milliseconds: 30))),
       },
