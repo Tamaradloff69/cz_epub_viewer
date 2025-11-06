@@ -85,7 +85,9 @@ class _EpubViewerState extends State<EpubViewer> {
       iframeAllowFullscreen: true,
       allowsLinkPreview: false,
       verticalScrollBarEnabled: false,
-      // disableVerticalScroll: true,
+      horizontalScrollBarEnabled: false, // <-- ADD THIS
+      disableHorizontalScroll: true,
+      //disableVerticalScroll: true,
       selectionGranularity: SelectionGranularity.CHARACTER);
 
   Future<String> _prepareFontJson() async {
@@ -280,8 +282,6 @@ class _EpubViewerState extends State<EpubViewer> {
         }
       },
       gestureRecognizers: {
-        Factory<VerticalDragGestureRecognizer>(
-                () => VerticalDragGestureRecognizer()),
         Factory<HorizontalDragGestureRecognizer>( // <-- ADD THIS LINE
                 () => HorizontalDragGestureRecognizer()),
         Factory<LongPressGestureRecognizer>(() => LongPressGestureRecognizer(
