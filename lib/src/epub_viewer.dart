@@ -215,8 +215,7 @@ class _EpubViewerState extends State<EpubViewer> {
     String direction = widget.displaySettings?.defaultDirection.name ??
         EpubDefaultDirection.ltr.name;
 
-    bool useCustomSwipe =
-        Platform.isAndroid && !displaySettings.useSnapAnimationAndroid;
+    bool useCustomSwipe = (displaySettings.flow == EpubFlow.paginated);
 
     String? backgroundColor =
         widget.displaySettings?.theme?.backgroundColor?.toHex();
@@ -282,7 +281,9 @@ class _EpubViewerState extends State<EpubViewer> {
       },
       gestureRecognizers: {
         Factory<VerticalDragGestureRecognizer>(
-            () => VerticalDragGestureRecognizer()),
+                () => VerticalDragGestureRecognizer()),
+        Factory<HorizontalDragGestureRecognizer>( // <-- ADD THIS LINE
+                () => HorizontalDragGestureRecognizer()),
         Factory<LongPressGestureRecognizer>(() => LongPressGestureRecognizer(
             duration: const Duration(milliseconds: 30))),
       },
