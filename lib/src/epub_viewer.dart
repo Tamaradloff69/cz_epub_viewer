@@ -283,6 +283,8 @@ class _EpubViewerState extends State<EpubViewer> {
       gestureRecognizers: {
         Factory<VerticalDragGestureRecognizer>(
             () => VerticalDragGestureRecognizer()),
+        Factory<HorizontalDragGestureRecognizer>(
+                () => HorizontalDragGestureRecognizer()),
         Factory<LongPressGestureRecognizer>(() => LongPressGestureRecognizer(
             duration: const Duration(milliseconds: 30))),
       },
