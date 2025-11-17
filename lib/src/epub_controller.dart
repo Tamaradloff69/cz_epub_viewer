@@ -40,6 +40,8 @@ class EpubController {
   ///Returns current location of epub viewer
   Future<EpubLocation> getCurrentLocation() async {
     checkEpubLoaded();
+
+    // 1. Get the raw result from the JavaScript function
     final result = await webViewController?.evaluateJavascript(
         source: 'getCurrentLocation()');
 
@@ -47,7 +49,14 @@ class EpubController {
       throw Exception("Epub locations not loaded");
     }
 
-    return EpubLocation.fromJson(result);
+    // 2. Explicitly cast the generic Map<Object?, Object?> returned by
+    //    InAppWebViewController on iOS to the expected Map<String, dynamic>.
+    //    This resolves the "type '_Map<Object?, Object?>' is not a subtype of
+    //    type 'Map<String, dynamic>'" error.
+    final Map<String, dynamic> convertedResult = Map<String, dynamic>.from(result);
+
+    // 3. Use the converted map to deserialize the EpubLocation object.
+    return EpubLocation.fromJson(convertedResult);
   }
 
   ///Returns list of [EpubChapter] from epub,
@@ -71,8 +80,11 @@ class EpubController {
   Future<EpubMetadata> getMetadata() async {
     checkEpubLoaded();
     final result =
-        await webViewController!.evaluateJavascript(source: 'getBookInfo()');
-    return EpubMetadata.fromJson(result);
+    await webViewController!.evaluateJavascript(source: 'getBookInfo()');
+
+    final Map<String, dynamic> convertedResult = Map<String, dynamic>.from(result);
+
+    return EpubMetadata.fromJson(convertedResult);
   }
 
   Completer searchResultCompleter = Completer<List<EpubSearchResult>>();
