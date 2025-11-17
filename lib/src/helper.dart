@@ -67,11 +67,12 @@ class EpubLocation {
     required this.totalPages,
   });
   factory EpubLocation.fromJson(Map<String, dynamic> json) {
+    // Note: Use 'num' for progress and totalPages since they may come as 'double' from JS
     return EpubLocation(
       startCfi: json['startCfi'] as String,
       endCfi: json['endCfi'] as String,
       progress: (json['progress'] as num).toDouble(),
-      totalPages: json['totalPages'] as int? ?? 0, // ADD THIS LINE
+      totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
     );
   }
 }
