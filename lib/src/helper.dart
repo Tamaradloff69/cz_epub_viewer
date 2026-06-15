@@ -60,12 +60,56 @@ class EpubLocation {
 
   int totalPages;
 
+  /// Current page in the device's paginated rendition (epub.js `displayed.page`).
+  ///
+  /// Only set when the viewer is in paginated mode; otherwise null.
+  final int? displayedPage;
+
+  /// Total pages in the device's paginated rendition (epub.js `displayed.total`).
+  ///
+  /// Only set when the viewer is in paginated mode; otherwise null.
+  final int? displayedTotal;
+
+  /// Whether the reader is at the last page of the book (epub.js `atEnd`).
+  final bool? atEnd;
+
+  /// Whether the reader is at the first page of the book (epub.js `atStart`).
+  final bool? atStart;
+
+  /// True when [displayedPage] and [displayedTotal] come from epub.js pagination.
+  final bool? hasRenderedPagination;
+
+  /// Stable book-wide total from `book.locations` once generation completes.
+  final int? absoluteTotalPages;
+
+  /// Current page index in location space (1-based), aligned with [progress].
+  final int? locationPage;
+
   EpubLocation({
     required this.startCfi,
     required this.endCfi,
     required this.progress,
     required this.totalPages,
+    this.displayedPage,
+    this.displayedTotal,
+    this.atEnd,
+    this.atStart,
+    this.hasRenderedPagination,
+    this.absoluteTotalPages,
+    this.locationPage,
   });
+
+  /// True when [displayedPage] and [displayedTotal] are valid for UI display.
+  bool get hasDisplayedPagination {
+    if (hasRenderedPagination == true) {
+      return true;
+    }
+
+    final page = displayedPage;
+    final total = displayedTotal;
+    return page != null && total != null && page > 0 && total > 0;
+  }
+
   factory EpubLocation.fromJson(Map<String, dynamic> json) {
     // Note: Use 'num' for progress and totalPages since they may come as 'double' from JS
     return EpubLocation(
@@ -73,6 +117,13 @@ class EpubLocation {
       endCfi: json['endCfi'] as String,
       progress: (json['progress'] as num).toDouble(),
       totalPages: (json['totalPages'] as num?)?.toInt() ?? 0,
+      displayedPage: (json['displayedPage'] as num?)?.toInt(),
+      displayedTotal: (json['displayedTotal'] as num?)?.toInt(),
+      atEnd: json['atEnd'] as bool?,
+      atStart: json['atStart'] as bool?,
+      hasRenderedPagination: json['hasRenderedPagination'] as bool?,
+      absoluteTotalPages: (json['absoluteTotalPages'] as num?)?.toInt(),
+      locationPage: (json['locationPage'] as num?)?.toInt(),
     );
   }
 }

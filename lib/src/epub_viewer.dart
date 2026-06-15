@@ -1,6 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/services.dart';
 import 'package:flutter_epub_viewer/src/epub_controller.dart';
 import 'package:flutter_epub_viewer/src/helper.dart';
@@ -73,6 +73,7 @@ class _EpubViewerState extends State<EpubViewer> {
   var selectedText = '';
 
   InAppWebViewController? webViewController;
+  Future<String>? _fontJsonFuture;
 
   InAppWebViewSettings settings = InAppWebViewSettings(
       isInspectable: kDebugMode,
@@ -111,6 +112,7 @@ class _EpubViewerState extends State<EpubViewer> {
   @override
   void initState() {
     // widget.epubController.initServer();
+    _fontJsonFuture = _prepareFontJson();
     super.initState();
   }
 
@@ -118,6 +120,7 @@ class _EpubViewerState extends State<EpubViewer> {
     webViewController?.addJavaScriptHandler(
         handlerName: "displayed",
         callback: (data) {
+          unawaited(_injectFontsAfterDisplay());
           widget.onEpubLoaded?.call();
         });
 
@@ -199,13 +202,18 @@ class _EpubViewerState extends State<EpubViewer> {
         });
   }
 
-  loadBook() async {
-    final String fontJson = await _prepareFontJson();
-    final displaySettings = widget.displaySettings ?? EpubDisplaySettings();
-
-    // 2. Escape the font JSON for safe transport inside the JS string
+  Future<void> _injectFontsAfterDisplay() async {
+    final String fontJson = await (_fontJsonFuture ?? _prepareFontJson());
     final escapedFontJson = fontJson.replaceAll('"', '\\"');
-    var data = await widget.epubSource.epubData;
+    await webViewController?.evaluateJavascript(
+      source: 'prepareFonts("$escapedFontJson")',
+    );
+  }
+
+  loadBook() async {
+    final displaySettings = widget.displaySettings ?? EpubDisplaySettings();
+    final Uint8List data = await widget.epubSource.epubData;
+    final String base64Data = base64Encode(data);
     String manager = displaySettings.manager.name;
     String flow = displaySettings.flow.name;
     String spread = displaySettings.spread.name;
@@ -223,10 +231,9 @@ class _EpubViewerState extends State<EpubViewer> {
     String? foregroundColor =
         widget.displaySettings?.theme?.foregroundColor?.toHex();
 
-    // NEW CODE (with the escapedFontJson variable added at the end)
     webViewController?.evaluateJavascript(
         source:
-        'loadBook([${data.join(',')}], "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor", "$escapedFontJson")');
+        'loadBook("$base64Data", "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor")');
   }
 
   @override
