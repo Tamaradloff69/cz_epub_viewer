@@ -24,6 +24,9 @@ class EpubViewer extends StatefulWidget {
     this.displaySettings,
     this.selectionContextMenu,
     this.onAnnotationClicked,
+    this.initialLocations,
+    this.onLocationsReady,
+    this.onVisualPaginationReady,
   });
 
   ///Epub controller to manage epub
@@ -60,6 +63,22 @@ class EpubViewer extends StatefulWidget {
   ///context menu for text selection
   ///if null, the default context menu will be used
   final ContextMenu? selectionContextMenu;
+
+  /// Base64-encoded `book.locations` JSON from a previous open.
+  ///
+  /// When provided the viewer restores it instead of regenerating locations,
+  /// dramatically speeding up repeat opens.
+  final String? initialLocations;
+
+  /// Called once with the base64-free `book.locations` JSON after a fresh
+  /// generation so the host can cache it (keyed by book).
+  final ValueChanged<String>? onLocationsReady;
+
+  /// Called when the exact per-section page map is ready (either from the
+  /// measurement sweep or a restored cache).
+  ///
+  /// The payload is `{ "sectionTotals": { spineIndex: pages }, "total": n }`.
+  final ValueChanged<Map<String, dynamic>>? onVisualPaginationReady;
 
   @override
   State<EpubViewer> createState() => _EpubViewerState();
@@ -135,6 +154,23 @@ class _EpubViewerState extends State<EpubViewer> {
       callback: (args) {
         final int totalPages = args[0];
         widget.onPageCountReady?.call(totalPages);
+      },
+    );
+
+    webViewController?.addJavaScriptHandler(
+      handlerName: 'locationsReady',
+      callback: (args) {
+        if (args.isEmpty || args[0] == null) return;
+        widget.onLocationsReady?.call(args[0].toString());
+      },
+    );
+
+    webViewController?.addJavaScriptHandler(
+      handlerName: 'visualPaginationReady',
+      callback: (args) {
+        if (args.isEmpty || args[0] == null) return;
+        widget.onVisualPaginationReady
+            ?.call(Map<String, dynamic>.from(args[0] as Map));
       },
     );
 
@@ -231,9 +267,11 @@ class _EpubViewerState extends State<EpubViewer> {
     String? foregroundColor =
         widget.displaySettings?.theme?.foregroundColor?.toHex();
 
+    final String locationsCache = widget.initialLocations ?? "";
+
     webViewController?.evaluateJavascript(
         source:
-        'loadBook("$base64Data", "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor")');
+        'loadBook("$base64Data", "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor", "$locationsCache")');
   }
 
   @override

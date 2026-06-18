@@ -85,6 +85,11 @@ class EpubLocation {
   /// Current page index in location space (1-based), aligned with [progress].
   final int? locationPage;
 
+  /// True once every section has been measured, so [displayedPage] and
+  /// [displayedTotal] are exact book-wide values (stable total, correct after
+  /// jumps, +1 per page) rather than an extrapolated estimate.
+  final bool? paginationReady;
+
   EpubLocation({
     required this.startCfi,
     required this.endCfi,
@@ -97,6 +102,7 @@ class EpubLocation {
     this.hasRenderedPagination,
     this.absoluteTotalPages,
     this.locationPage,
+    this.paginationReady,
   });
 
   /// True when [displayedPage] and [displayedTotal] are valid for UI display.
@@ -124,6 +130,7 @@ class EpubLocation {
       hasRenderedPagination: json['hasRenderedPagination'] as bool?,
       absoluteTotalPages: (json['absoluteTotalPages'] as num?)?.toInt(),
       locationPage: (json['locationPage'] as num?)?.toInt(),
+      paginationReady: json['paginationReady'] as bool?,
     );
   }
 }

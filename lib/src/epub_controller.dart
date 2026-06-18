@@ -210,6 +210,40 @@ class EpubController {
     return pageTextCompleter.future;
   }
 
+  /// Whether the bundled viewer JS actually supports the measurement sweep.
+  ///
+  /// Guards against a stale bundled `epubView.js` (e.g. an incremental build
+  /// that did not re-copy the package asset): if the function is missing the
+  /// host can fall back immediately instead of waiting on a sweep that will
+  /// never report.
+  Future<bool> supportsVisualPagination() async {
+    checkEpubLoaded();
+    final result = await webViewController?.evaluateJavascript(
+        source: "(typeof precomputeVisualPages === 'function')");
+    return result == true || result == 1;
+  }
+
+  /// Runs a one-time measurement sweep that renders every section to compute an
+  /// exact, book-wide page count.
+  ///
+  /// While it runs the viewer mutes relocate events (so the host UI should keep
+  /// a loading overlay up). When finished it returns to the current position and
+  /// the result is delivered via [EpubViewer.onVisualPaginationReady] so the host
+  /// can cache it and skip the sweep on subsequent opens.
+  Future<void> precomputeVisualPagination() async {
+    checkEpubLoaded();
+    await webViewController?.evaluateJavascript(source: 'precomputeVisualPages()');
+  }
+
+  /// Restores a previously cached per-section page map (base64-encoded JSON of
+  /// `{ "sectionTotals": {..}, "total": n }`) so the viewer reports exact page
+  /// numbers immediately without re-running [precomputeVisualPagination].
+  Future<void> applyVisualPagination(String base64Json) async {
+    checkEpubLoaded();
+    await webViewController?.evaluateJavascript(
+        source: 'applyVisualPagination("$base64Json")');
+  }
+
   ///Given a percentage moves to the corresponding page
   ///Progress percentage should be between 0.0 and 1.0
   toProgressPercentage(double progressPercent) {
@@ -218,6 +252,12 @@ class EpubController {
     checkEpubLoaded();
     webViewController?.evaluateJavascript(
         source: 'toProgress($progressPercent)');
+  }
+
+  /// Jumps to a 1-based location page when `book.locations` is ready.
+  Future<void> toLocationPage(int page) async {
+    checkEpubLoaded();
+    await webViewController?.evaluateJavascript(source: 'toLocationPage($page)');
   }
 
   ///Moves to the first page of the epub
