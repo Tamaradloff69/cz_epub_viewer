@@ -1,3 +1,12 @@
+## 1.2.3
+- Fixed bookmark and progress navigation opening page 1 when `book.locations` was not yet ready (progress jumps are now queued until locations generate)
+- Fixed CFI-based navigation for bookmark ranges by collapsing range CFIs to a display point before calling `rendition.display`
+- Fixed slider navigation stale relocate events bouncing the reader to an earlier page after a programmatic jump
+- Added `toLocationPage` for 1-based location-index navigation aligned with the page slider
+- Added programmatic navigation guards (`beginProgrammaticNav`, `shouldSuppressRelocated`) to filter ghost relocate events from the continuous manager
+- Added locations cache support via `locationsCacheB64` on `loadBook` and `locationsReady` callback for persisting generated locations
+- Fixed `EpubController.display()` to pass CFIs through `jsonEncode` so special characters do not break the WebView JS call
+
 ## 1.2.2
 - Added book metadata
 

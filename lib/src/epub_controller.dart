@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_epub_viewer/src/epub_metadata.dart';
 import 'package:flutter_epub_viewer/src/helper.dart';
@@ -22,7 +23,7 @@ class EpubController {
     required String cfi,
   }) {
     checkEpubLoaded();
-    webViewController?.evaluateJavascript(source: 'toCfi("$cfi")');
+    webViewController?.evaluateJavascript(source: 'toCfi(${jsonEncode(cfi)})');
   }
 
   ///Moves to next page in epub view

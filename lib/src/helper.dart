@@ -85,6 +85,9 @@ class EpubLocation {
   /// Current page index in location space (1-based), aligned with [progress].
   final int? locationPage;
 
+  /// Spine href for the section currently displayed in the reader.
+  final String href;
+
   /// True once every section has been measured, so [displayedPage] and
   /// [displayedTotal] are exact book-wide values (stable total, correct after
   /// jumps, +1 per page) rather than an extrapolated estimate.
@@ -103,6 +106,7 @@ class EpubLocation {
     this.absoluteTotalPages,
     this.locationPage,
     this.paginationReady,
+    this.href = '',
   });
 
   /// True when [displayedPage] and [displayedTotal] are valid for UI display.
@@ -131,6 +135,7 @@ class EpubLocation {
       absoluteTotalPages: (json['absoluteTotalPages'] as num?)?.toInt(),
       locationPage: (json['locationPage'] as num?)?.toInt(),
       paginationReady: json['paginationReady'] as bool?,
+      href: json['href'] as String? ?? '',
     );
   }
 }
