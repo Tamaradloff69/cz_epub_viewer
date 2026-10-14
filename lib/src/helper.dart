@@ -171,6 +171,13 @@ class EpubDisplaySettings {
   @JsonKey(includeFromJson: false, includeToJson: false)
   final EpubTheme? theme;
 
+  /// Leaves the book's first section out of the reading order, so the book
+  /// opens on its second section, there is no page turn back to the first, and
+  /// its pages are not counted. For books whose first section is an index page
+  /// the reader should not see (e.g. a sample).
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final bool skipFirstSection;
+
   EpubDisplaySettings({
     this.fontSize = 15,
     this.spread = EpubSpread.auto,
@@ -181,6 +188,7 @@ class EpubDisplaySettings {
     this.useSnapAnimationAndroid = false,
     this.manager = EpubManager.continuous,
     this.theme,
+    this.skipFirstSection = false,
   });
   factory EpubDisplaySettings.fromJson(Map<String, dynamic> json) =>
       _$EpubDisplaySettingsFromJson(json);

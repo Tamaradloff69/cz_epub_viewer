@@ -268,10 +268,11 @@ class _EpubViewerState extends State<EpubViewer> {
         widget.displaySettings?.theme?.foregroundColor?.toHex();
 
     final String locationsCache = widget.initialLocations ?? "";
+    final bool skipFirstSection = displaySettings.skipFirstSection;
 
     webViewController?.evaluateJavascript(
         source:
-        'loadBook("$base64Data", "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor", "$locationsCache")');
+        'loadBook("$base64Data", "$cfi", "$manager", "$flow", "$spread", $snap, $allowScripted, "$direction", $useCustomSwipe, "$backgroundColor", "$foregroundColor", "$locationsCache", $skipFirstSection)');
   }
 
   @override
